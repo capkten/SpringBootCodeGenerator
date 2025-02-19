@@ -205,3 +205,6 @@ rebel-remote.xml
 
 # web modules
 web-page/my-vue-app/node_modules
+
+# generator code
+projects/
