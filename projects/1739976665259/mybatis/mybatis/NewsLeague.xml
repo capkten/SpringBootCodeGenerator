@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hzy.dao.NewsLeagueMapper">
+
+    <resultMap id="BaseResultMap" type="com.hzy.entity.NewsLeague" >
+                <result column="n_id" property="nId" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+                n_id
+    </sql>
+
+    <insert id="insert" useGeneratedKeys="true" keyColumn="id" keyProperty="id" parameterType="com.hzy.entity.NewsLeague">
+        INSERT INTO news_league
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+                        <if test="null != nId ">
+                        n_id
+                        </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+                        <if test="null != nId ">
+                        #{nId}
+                        </if>
+        </trim>
+    </insert>
+
+    <delete id="delete" >
+        DELETE FROM news_league
+        WHERE id = #{id}
+    </delete>
+
+    <update id="update" parameterType="com.hzy.entity.NewsLeague">
+        UPDATE news_league
+        <set>
+                    <if test="null != nId ">n_id = #{nId}</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+
+    <select id="load" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List" />
+        FROM news_league
+        WHERE id = #{id}
+    </select>
+
+    <select id="pageList" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List" />
+        FROM news_league
+        LIMIT #{offset}, #{pageSize}
+    </select>
+
+    <select id="pageListCount" resultType="java.lang.Integer">
+        SELECT count(1)
+        FROM news_league
+    </select>
+
+</mapper>

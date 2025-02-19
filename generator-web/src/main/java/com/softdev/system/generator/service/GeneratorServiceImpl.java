@@ -138,8 +138,7 @@ public class GeneratorServiceImpl implements GeneratorService {
      * @return
      */
     @Override
-    public ClassInfo processTableIntoClassInfo(ParamInfo paramInfo)
-            throws IOException {
+    public ClassInfo processTableIntoClassInfo(ParamInfo paramInfo) {
         //process the param
         NonCaseString tableSql = NonCaseString.of(paramInfo.getTableSql());
         String nameCaseType = MapUtil.getString(paramInfo.getOptions(),"nameCaseType");
@@ -580,6 +579,33 @@ public class GeneratorServiceImpl implements GeneratorService {
         }
         codeJavaInfo.setFieldList(fieldList);
         return codeJavaInfo;
+    }
+
+    @Override
+    public List<ClassInfo> processTablesIntoClassInfos(ParamInfo paramInfo) {
+        String tableSql = paramInfo.getTableSql();
+        if (StringUtils.isEmpty(tableSql)) {
+            return null;
+        }
+        List<String> tableSqlList = extractCreateTableStatements(tableSql);
+        List<ClassInfo> classInfos = new ArrayList<>();
+        for (String s : tableSqlList) {
+            paramInfo.setTableSql(s);
+            classInfos.add(processTableIntoClassInfo(paramInfo));
+        }
+        return classInfos;
+    }
+
+    public List<String> extractCreateTableStatements(String sql) {
+        List<String> createTableStatements = new ArrayList<>();
+        // 改进后的正则表达式，匹配 CREATE TABLE 语句，包括字段注释和表注释
+        String DDL_PATTERN_STR = "(?is)\\bcreate\\s+table\\s+(?:`|'|\\b)(\\w+|[^`']+)(?:`|'|\\b)\\s*\\([^\\)]*\\)(?:\\s+comment\\s*[^;]*;)?\\s*(?:,\\s*[^,]*\\s*comment\\s*[^;]*;\\s*)*\\s*(?:ENGINE=\\w+\\s+DEFAULT\\s+CHARSET=\\w+\\s+COMMENT='[^']*';)?";
+        Pattern DDL_PATTERN = Pattern.compile(DDL_PATTERN_STR, Pattern.CASE_INSENSITIVE);
+        Matcher matcher = DDL_PATTERN.matcher(sql);
+        while (matcher.find()) {
+            createTableStatements.add(matcher.group().trim());
+        }
+        return createTableStatements;
     }
 
 }

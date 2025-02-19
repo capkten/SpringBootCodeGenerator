@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hzy.dao.CommentsPostsMapper">
+
+    <resultMap id="BaseResultMap" type="com.hzy.entity.CommentsPosts" >
+                <result column="id" property="id" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+                id
+    </sql>
+
+    <insert id="insert" useGeneratedKeys="true" keyColumn="id" keyProperty="id" parameterType="com.hzy.entity.CommentsPosts">
+        INSERT INTO comments_posts
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+        </trim>
+    </insert>
+
+    <delete id="delete" >
+        DELETE FROM comments_posts
+        WHERE id = #{id}
+    </delete>
+
+    <update id="update" parameterType="com.hzy.entity.CommentsPosts">
+        UPDATE comments_posts
+        <set>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+
+    <select id="load" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List" />
+        FROM comments_posts
+        WHERE id = #{id}
+    </select>
+
+    <select id="pageList" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List" />
+        FROM comments_posts
+        LIMIT #{offset}, #{pageSize}
+    </select>
+
+    <select id="pageListCount" resultType="java.lang.Integer">
+        SELECT count(1)
+        FROM comments_posts
+    </select>
+
+</mapper>

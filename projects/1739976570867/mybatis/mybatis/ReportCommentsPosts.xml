@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hzy.dao.ReportCommentsPostsMapper">
+
+    <resultMap id="BaseResultMap" type="com.hzy.entity.ReportCommentsPosts" >
+                <result column="cp_id" property="cpId" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+                cp_id
+    </sql>
+
+    <insert id="insert" useGeneratedKeys="true" keyColumn="id" keyProperty="id" parameterType="com.hzy.entity.ReportCommentsPosts">
+        INSERT INTO report_comments_posts
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+                        <if test="null != cpId ">
+                        cp_id
+                        </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+                        <if test="null != cpId ">
+                        #{cpId}
+                        </if>
+        </trim>
+    </insert>
+
+    <delete id="delete" >
+        DELETE FROM report_comments_posts
+        WHERE id = #{id}
+    </delete>
+
+    <update id="update" parameterType="com.hzy.entity.ReportCommentsPosts">
+        UPDATE report_comments_posts
+        <set>
+                    <if test="null != cpId ">cp_id = #{cpId}</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+
+    <select id="load" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List" />
+        FROM report_comments_posts
+        WHERE id = #{id}
+    </select>
+
+    <select id="pageList" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List" />
+        FROM report_comments_posts
+        LIMIT #{offset}, #{pageSize}
+    </select>
+
+    <select id="pageListCount" resultType="java.lang.Integer">
+        SELECT count(1)
+        FROM report_comments_posts
+    </select>
+
+</mapper>

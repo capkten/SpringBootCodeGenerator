@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hzy.dao.ReportCommentsNewsMapper">
+
+    <resultMap id="BaseResultMap" type="com.hzy.entity.ReportCommentsNews" >
+                <result column="cn_id" property="cnId" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+                cn_id
+    </sql>
+
+    <insert id="insert" useGeneratedKeys="true" keyColumn="id" keyProperty="id" parameterType="com.hzy.entity.ReportCommentsNews">
+        INSERT INTO report_comments_news
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+                        <if test="null != cnId ">
+                        cn_id
+                        </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+                        <if test="null != cnId ">
+                        #{cnId}
+                        </if>
+        </trim>
+    </insert>
+
+    <delete id="delete" >
+        DELETE FROM report_comments_news
+        WHERE id = #{id}
+    </delete>
+
+    <update id="update" parameterType="com.hzy.entity.ReportCommentsNews">
+        UPDATE report_comments_news
+        <set>
+                    <if test="null != cnId ">cn_id = #{cnId}</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+
+    <select id="load" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List" />
+        FROM report_comments_news
+        WHERE id = #{id}
+    </select>
+
+    <select id="pageList" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List" />
+        FROM report_comments_news
+        LIMIT #{offset}, #{pageSize}
+    </select>
+
+    <select id="pageListCount" resultType="java.lang.Integer">
+        SELECT count(1)
+        FROM report_comments_news
+    </select>
+
+</mapper>

@@ -1,0 +1,84 @@
+//***************************
+//[report_comments_news - report_comments_news]
+//AUTHOR capkin
+//HISTORY 2025-02-19
+//***************************
+
+//***************************
+//load all
+[report_comments_news]:
+LOAD * FROM ['LIB://QVD/ReportCommentsNews.qvd'](qvd);
+
+//***************************
+//load columns
+[report_comments_news]:
+LOAD
+    "cn_id" as "cnId"
+FROM
+['LIB://QVD/ReportCommentsNews.qvd'](qvd);
+;
+
+//load inline
+[report_comments_news]:
+LOAD * INLINE
+[
+cn_id 
+cnId  
+cn_id  
+];
+
+//***************************
+//load from api data connection (wrap on)
+LIB CONNECT TO 'report_comments_news_api';
+
+RestConnectorMasterTable:
+    SQL SELECT
+    "__KEY_root",
+    (SELECT
+    "cn_id"
+        "__FK_object"
+    FROM "object" FK "__FK_object")
+    FROM JSON (wrap on) "root" PK "__KEY_root"
+//    WITH CONNECTION (
+//    Url "https://localhost:8080/report_comments_news_api",
+//    QUERY "page" "1",
+//    QUERY "size" "100",
+//    HTTPHEADER "token" "123456",
+//    BODY "Post body here")
+;
+
+[ReportCommentsNews]:
+LOAD
+    [cn_id] as [cnId]
+    [__FK_object] AS [__KEY_root]
+RESIDENT RestConnectorMasterTable
+WHERE NOT IsNull([__FK_stores]);
+
+DROP TABLE [ReportCommentsNews];
+DROP TABLE RestConnectorMasterTable;
+
+//***************************
+//load from api data connection (wrap off)
+LIB CONNECT TO 'report_comments_news_api';
+[ReportCommentsNews]:
+SQL SELECT
+    [cnId] as [cnId]
+FROM JSON(wrap off) "ReportCommentsNews"
+//    WITH CONNECTION (
+//    Url "https://localhost:8080/report_comments_news_api",
+//    QUERY "page" "1",
+//    QUERY "size" "100",
+//    HTTPHEADER "token" "123456",
+//    BODY "Post body here")
+;
+
+//***************************
+//load from sql data connection
+LIB CONNECT TO 'report_comments_news_db';
+
+SQL SELECT
+    [cn_id] as [cnId]
+FROM
+     report_comments_news
+WHERE
+     Create_Time > '2023-01-01 00:00:00';

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hzy.dao.CollectNewsMapper">
+
+    <resultMap id="BaseResultMap" type="com.hzy.entity.CollectNews" >
+                <result column="id" property="id" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+                id
+    </sql>
+
+    <insert id="insert" useGeneratedKeys="true" keyColumn="id" keyProperty="id" parameterType="com.hzy.entity.CollectNews">
+        INSERT INTO collect_news
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+        </trim>
+    </insert>
+
+    <delete id="delete" >
+        DELETE FROM collect_news
+        WHERE id = #{id}
+    </delete>
+
+    <update id="update" parameterType="com.hzy.entity.CollectNews">
+        UPDATE collect_news
+        <set>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+
+    <select id="load" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List" />
+        FROM collect_news
+        WHERE id = #{id}
+    </select>
+
+    <select id="pageList" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List" />
+        FROM collect_news
+        LIMIT #{offset}, #{pageSize}
+    </select>
+
+    <select id="pageListCount" resultType="java.lang.Integer">
+        SELECT count(1)
+        FROM collect_news
+    </select>
+
+</mapper>

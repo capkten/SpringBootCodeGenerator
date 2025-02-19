@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSONArray;
 import com.softdev.system.generator.entity.ClassInfo;
 import com.softdev.system.generator.entity.ParamInfo;
 import com.softdev.system.generator.entity.ReturnT;
+import com.softdev.system.generator.service.FileService;
 import com.softdev.system.generator.service.GeneratorService;
 import com.softdev.system.generator.util.MapUtil;
 import com.softdev.system.generator.util.TableParseUtil;
@@ -17,7 +18,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -26,12 +29,16 @@ import java.util.Map;
  */
 @Controller
 @Slf4j
+@CrossOrigin
 public class GeneratorController {
     @Autowired
     private ValueUtil valueUtil;
 
     @Autowired
     private GeneratorService generatorService;
+
+    @Autowired
+    private FileService fileService;
 
     @GetMapping("/")
     public ModelAndView defaultPage() {
@@ -44,6 +51,11 @@ public class GeneratorController {
     @GetMapping("/main")
     public ModelAndView mainPage() {
         return new ModelAndView("main").addObject("value",valueUtil);
+    }
+
+    @GetMapping("/new")
+    public ModelAndView newPage() {
+        return new ModelAndView("new").addObject("value",valueUtil);
     }
 
     @RequestMapping("/template/all")
@@ -102,4 +114,59 @@ public class GeneratorController {
         return ReturnT.ok().put("outputJson",result);
     }
 
+    // 兼容多个表的情况
+    @PostMapping("/code/generator/all")
+    @ResponseBody
+    public ReturnT generateCodeAll(@RequestBody ParamInfo paramInfo) throws Exception {
+        if (StringUtils.isEmpty(paramInfo.getTableSql())) {
+            return ReturnT.error("表结构信息为空");
+        }
+        //1.Parse Table Structure 表结构解析
+        List<ClassInfo> classInfoList = null;
+        String dataType = MapUtil.getString(paramInfo.getOptions(), "dataType");
+        switch (dataType) {
+            case "sql":
+                //默认模式：parse DDL table structure from sql
+                classInfoList = generatorService.processTablesIntoClassInfos(paramInfo);
+                break;
+            case "json":
+                //JSON模式：parse field from json string
+//                classInfo = generatorService.processJsonToClassInfo(paramInfo);
+                break;
+            case "insert-sql":
+                //INSERT SQL模式：parse field from insert sql
+//                classInfo = generatorService.processInsertSqlToClassInfo(paramInfo);
+                break;
+            case "sql-regex":
+                //正则表达式模式（非完善版本）：parse sql by regex
+//                classInfo = generatorService.processTableToClassInfoByRegex(paramInfo);
+                break;
+            case "select-sql":
+                //SelectSqlBySQLPraser模式:parse select sql by JSqlParser
+//                classInfo = generatorService.generateSelectSqlBySQLPraser(paramInfo);
+                break;
+            default:
+                //默认模式：parse DDL table structure from sql
+//                classInfo = generatorService.processTableIntoClassInfo(paramInfo);
+                break;
+        }
+        List<Map<String, String>> results = new ArrayList<>();
+        // 批量处理
+        for (ClassInfo classInfo : classInfoList) {
+            //2.Set the params 设置表格参数
+            paramInfo.getOptions().put("classInfo", classInfo);
+            paramInfo.getOptions().put("tableName", classInfo == null ? System.currentTimeMillis() : classInfo.getTableName());
+
+            //log the generated table and filed size记录解析了什么表，有多少个字段
+            //log.info("generated table :{} , size :{}",classInfo.getTableName(),(classInfo.getFieldList() == null ? "" : classInfo.getFieldList().size()));
+
+            //3.generate the code by freemarker templates with parameters . Freemarker根据参数和模板生成代码
+            Map<String, String> result = generatorService.getResultByParams(paramInfo.getOptions());
+//        log.info("result {}",result);
+            log.info("table:{} - time:{} ", MapUtil.getString(result,"tableName"),new Date());
+            results.add(result);
+        }
+        String downloadUrl = fileService.saveFile(results);
+        return ReturnT.ok().put("results", results).put("url", downloadUrl);
+    }
 }

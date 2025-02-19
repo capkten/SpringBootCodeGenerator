@@ -1,0 +1,84 @@
+//***************************
+//[comments_posts - comments_posts]
+//AUTHOR capkin
+//HISTORY 2025-02-19
+//***************************
+
+//***************************
+//load all
+[comments_posts]:
+LOAD * FROM ['LIB://QVD/CommentsPosts.qvd'](qvd);
+
+//***************************
+//load columns
+[comments_posts]:
+LOAD
+    "id" as "id"
+FROM
+['LIB://QVD/CommentsPosts.qvd'](qvd);
+;
+
+//load inline
+[comments_posts]:
+LOAD * INLINE
+[
+id 
+id  
+id  
+];
+
+//***************************
+//load from api data connection (wrap on)
+LIB CONNECT TO 'comments_posts_api';
+
+RestConnectorMasterTable:
+    SQL SELECT
+    "__KEY_root",
+    (SELECT
+    "id"
+        "__FK_object"
+    FROM "object" FK "__FK_object")
+    FROM JSON (wrap on) "root" PK "__KEY_root"
+//    WITH CONNECTION (
+//    Url "https://localhost:8080/comments_posts_api",
+//    QUERY "page" "1",
+//    QUERY "size" "100",
+//    HTTPHEADER "token" "123456",
+//    BODY "Post body here")
+;
+
+[CommentsPosts]:
+LOAD
+    [id] as [id]
+    [__FK_object] AS [__KEY_root]
+RESIDENT RestConnectorMasterTable
+WHERE NOT IsNull([__FK_stores]);
+
+DROP TABLE [CommentsPosts];
+DROP TABLE RestConnectorMasterTable;
+
+//***************************
+//load from api data connection (wrap off)
+LIB CONNECT TO 'comments_posts_api';
+[CommentsPosts]:
+SQL SELECT
+    [id] as [id]
+FROM JSON(wrap off) "CommentsPosts"
+//    WITH CONNECTION (
+//    Url "https://localhost:8080/comments_posts_api",
+//    QUERY "page" "1",
+//    QUERY "size" "100",
+//    HTTPHEADER "token" "123456",
+//    BODY "Post body here")
+;
+
+//***************************
+//load from sql data connection
+LIB CONNECT TO 'comments_posts_db';
+
+SQL SELECT
+    [id] as [id]
+FROM
+     comments_posts
+WHERE
+     Create_Time > '2023-01-01 00:00:00';

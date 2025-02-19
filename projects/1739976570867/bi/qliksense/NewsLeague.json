@@ -1,0 +1,84 @@
+//***************************
+//[news_league - news_league]
+//AUTHOR capkin
+//HISTORY 2025-02-19
+//***************************
+
+//***************************
+//load all
+[news_league]:
+LOAD * FROM ['LIB://QVD/NewsLeague.qvd'](qvd);
+
+//***************************
+//load columns
+[news_league]:
+LOAD
+    "n_id" as "nId"
+FROM
+['LIB://QVD/NewsLeague.qvd'](qvd);
+;
+
+//load inline
+[news_league]:
+LOAD * INLINE
+[
+n_id 
+nId  
+n_id  
+];
+
+//***************************
+//load from api data connection (wrap on)
+LIB CONNECT TO 'news_league_api';
+
+RestConnectorMasterTable:
+    SQL SELECT
+    "__KEY_root",
+    (SELECT
+    "n_id"
+        "__FK_object"
+    FROM "object" FK "__FK_object")
+    FROM JSON (wrap on) "root" PK "__KEY_root"
+//    WITH CONNECTION (
+//    Url "https://localhost:8080/news_league_api",
+//    QUERY "page" "1",
+//    QUERY "size" "100",
+//    HTTPHEADER "token" "123456",
+//    BODY "Post body here")
+;
+
+[NewsLeague]:
+LOAD
+    [n_id] as [nId]
+    [__FK_object] AS [__KEY_root]
+RESIDENT RestConnectorMasterTable
+WHERE NOT IsNull([__FK_stores]);
+
+DROP TABLE [NewsLeague];
+DROP TABLE RestConnectorMasterTable;
+
+//***************************
+//load from api data connection (wrap off)
+LIB CONNECT TO 'news_league_api';
+[NewsLeague]:
+SQL SELECT
+    [nId] as [nId]
+FROM JSON(wrap off) "NewsLeague"
+//    WITH CONNECTION (
+//    Url "https://localhost:8080/news_league_api",
+//    QUERY "page" "1",
+//    QUERY "size" "100",
+//    HTTPHEADER "token" "123456",
+//    BODY "Post body here")
+;
+
+//***************************
+//load from sql data connection
+LIB CONNECT TO 'news_league_db';
+
+SQL SELECT
+    [n_id] as [nId]
+FROM
+     news_league
+WHERE
+     Create_Time > '2023-01-01 00:00:00';

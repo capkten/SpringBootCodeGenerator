@@ -6,6 +6,7 @@ import freemarker.template.TemplateException;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -53,4 +54,11 @@ public interface GeneratorService {
      * @return
      */
     ClassInfo processInsertSqlToClassInfo(ParamInfo paramInfo);
+
+    /**
+     * 批量解析sql
+     * @param paramInfo
+     * @return
+     */
+    List<ClassInfo> processTablesIntoClassInfos(ParamInfo paramInfo);
 }

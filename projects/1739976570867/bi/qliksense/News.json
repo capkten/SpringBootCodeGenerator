@@ -1,0 +1,84 @@
+//***************************
+//[news - news]
+//AUTHOR capkin
+//HISTORY 2025-02-19
+//***************************
+
+//***************************
+//load all
+[news]:
+LOAD * FROM ['LIB://QVD/News.qvd'](qvd);
+
+//***************************
+//load columns
+[news]:
+LOAD
+    "id" as "id"
+FROM
+['LIB://QVD/News.qvd'](qvd);
+;
+
+//load inline
+[news]:
+LOAD * INLINE
+[
+id 
+id  
+id  
+];
+
+//***************************
+//load from api data connection (wrap on)
+LIB CONNECT TO 'news_api';
+
+RestConnectorMasterTable:
+    SQL SELECT
+    "__KEY_root",
+    (SELECT
+    "id"
+        "__FK_object"
+    FROM "object" FK "__FK_object")
+    FROM JSON (wrap on) "root" PK "__KEY_root"
+//    WITH CONNECTION (
+//    Url "https://localhost:8080/news_api",
+//    QUERY "page" "1",
+//    QUERY "size" "100",
+//    HTTPHEADER "token" "123456",
+//    BODY "Post body here")
+;
+
+[News]:
+LOAD
+    [id] as [id]
+    [__FK_object] AS [__KEY_root]
+RESIDENT RestConnectorMasterTable
+WHERE NOT IsNull([__FK_stores]);
+
+DROP TABLE [News];
+DROP TABLE RestConnectorMasterTable;
+
+//***************************
+//load from api data connection (wrap off)
+LIB CONNECT TO 'news_api';
+[News]:
+SQL SELECT
+    [id] as [id]
+FROM JSON(wrap off) "News"
+//    WITH CONNECTION (
+//    Url "https://localhost:8080/news_api",
+//    QUERY "page" "1",
+//    QUERY "size" "100",
+//    HTTPHEADER "token" "123456",
+//    BODY "Post body here")
+;
+
+//***************************
+//load from sql data connection
+LIB CONNECT TO 'news_db';
+
+SQL SELECT
+    [id] as [id]
+FROM
+     news
+WHERE
+     Create_Time > '2023-01-01 00:00:00';

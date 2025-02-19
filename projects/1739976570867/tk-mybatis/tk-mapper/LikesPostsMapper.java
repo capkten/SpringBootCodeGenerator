@@ -1,0 +1,16 @@
+package com.hzy.mapper;
+import com.hzy.entity.LikesPosts;
+
+import java.util.List;
+import io.mybatis.mapper.Mapper;
+/**
+ * @description likes_posts
+ * @author capkin
+ * @date 2025-02-19
+ */
+@org.apache.ibatis.annotations.Mapper
+public interface LikesPostsMapper extends Mapper<LikesPosts,Integer> {
+
+
+
+}

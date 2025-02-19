@@ -1,0 +1,84 @@
+//***************************
+//[news_editor - news_editor]
+//AUTHOR capkin
+//HISTORY 2025-02-19
+//***************************
+
+//***************************
+//load all
+[news_editor]:
+LOAD * FROM ['LIB://QVD/NewsEditor.qvd'](qvd);
+
+//***************************
+//load columns
+[news_editor]:
+LOAD
+    "id" as "id"
+FROM
+['LIB://QVD/NewsEditor.qvd'](qvd);
+;
+
+//load inline
+[news_editor]:
+LOAD * INLINE
+[
+id 
+id  
+id  
+];
+
+//***************************
+//load from api data connection (wrap on)
+LIB CONNECT TO 'news_editor_api';
+
+RestConnectorMasterTable:
+    SQL SELECT
+    "__KEY_root",
+    (SELECT
+    "id"
+        "__FK_object"
+    FROM "object" FK "__FK_object")
+    FROM JSON (wrap on) "root" PK "__KEY_root"
+//    WITH CONNECTION (
+//    Url "https://localhost:8080/news_editor_api",
+//    QUERY "page" "1",
+//    QUERY "size" "100",
+//    HTTPHEADER "token" "123456",
+//    BODY "Post body here")
+;
+
+[NewsEditor]:
+LOAD
+    [id] as [id]
+    [__FK_object] AS [__KEY_root]
+RESIDENT RestConnectorMasterTable
+WHERE NOT IsNull([__FK_stores]);
+
+DROP TABLE [NewsEditor];
+DROP TABLE RestConnectorMasterTable;
+
+//***************************
+//load from api data connection (wrap off)
+LIB CONNECT TO 'news_editor_api';
+[NewsEditor]:
+SQL SELECT
+    [id] as [id]
+FROM JSON(wrap off) "NewsEditor"
+//    WITH CONNECTION (
+//    Url "https://localhost:8080/news_editor_api",
+//    QUERY "page" "1",
+//    QUERY "size" "100",
+//    HTTPHEADER "token" "123456",
+//    BODY "Post body here")
+;
+
+//***************************
+//load from sql data connection
+LIB CONNECT TO 'news_editor_db';
+
+SQL SELECT
+    [id] as [id]
+FROM
+     news_editor
+WHERE
+     Create_Time > '2023-01-01 00:00:00';

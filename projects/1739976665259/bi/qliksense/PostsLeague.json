@@ -1,0 +1,84 @@
+//***************************
+//[posts_league - posts_league]
+//AUTHOR capkin
+//HISTORY 2025-02-19
+//***************************
+
+//***************************
+//load all
+[posts_league]:
+LOAD * FROM ['LIB://QVD/PostsLeague.qvd'](qvd);
+
+//***************************
+//load columns
+[posts_league]:
+LOAD
+    "id" as "id"
+FROM
+['LIB://QVD/PostsLeague.qvd'](qvd);
+;
+
+//load inline
+[posts_league]:
+LOAD * INLINE
+[
+id 
+id  
+id  
+];
+
+//***************************
+//load from api data connection (wrap on)
+LIB CONNECT TO 'posts_league_api';
+
+RestConnectorMasterTable:
+    SQL SELECT
+    "__KEY_root",
+    (SELECT
+    "id"
+        "__FK_object"
+    FROM "object" FK "__FK_object")
+    FROM JSON (wrap on) "root" PK "__KEY_root"
+//    WITH CONNECTION (
+//    Url "https://localhost:8080/posts_league_api",
+//    QUERY "page" "1",
+//    QUERY "size" "100",
+//    HTTPHEADER "token" "123456",
+//    BODY "Post body here")
+;
+
+[PostsLeague]:
+LOAD
+    [id] as [id]
+    [__FK_object] AS [__KEY_root]
+RESIDENT RestConnectorMasterTable
+WHERE NOT IsNull([__FK_stores]);
+
+DROP TABLE [PostsLeague];
+DROP TABLE RestConnectorMasterTable;
+
+//***************************
+//load from api data connection (wrap off)
+LIB CONNECT TO 'posts_league_api';
+[PostsLeague]:
+SQL SELECT
+    [id] as [id]
+FROM JSON(wrap off) "PostsLeague"
+//    WITH CONNECTION (
+//    Url "https://localhost:8080/posts_league_api",
+//    QUERY "page" "1",
+//    QUERY "size" "100",
+//    HTTPHEADER "token" "123456",
+//    BODY "Post body here")
+;
+
+//***************************
+//load from sql data connection
+LIB CONNECT TO 'posts_league_db';
+
+SQL SELECT
+    [id] as [id]
+FROM
+     posts_league
+WHERE
+     Create_Time > '2023-01-01 00:00:00';

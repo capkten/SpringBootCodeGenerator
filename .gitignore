@@ -202,3 +202,6 @@ buildNumber.properties
 rebel.xml
 rebel-remote.xml
 # End of https://www.gitignore.io/api/java,maven,eclipse,java-web,intellij+all
+
+# web modules
+web-page/my-vue-app/node_modules

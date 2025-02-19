@@ -1,7 +1,11 @@
 server:
-  port: 1234
+  port: 9090
   servlet:
       context-path: /generator
+code:
+  generator:
+    file:
+      location: E:\code\SpringBootCodeGenerator\projects
 #tomcat:
 #    remote-ip-header: x-forward-for
 #    uri-encoding: UTF-8

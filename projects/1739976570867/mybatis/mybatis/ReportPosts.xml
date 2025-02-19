@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hzy.dao.ReportPostsMapper">
+
+    <resultMap id="BaseResultMap" type="com.hzy.entity.ReportPosts" >
+                <result column="p_id" property="pId" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+                p_id
+    </sql>
+
+    <insert id="insert" useGeneratedKeys="true" keyColumn="id" keyProperty="id" parameterType="com.hzy.entity.ReportPosts">
+        INSERT INTO report_posts
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+                        <if test="null != pId ">
+                        p_id
+                        </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+                        <if test="null != pId ">
+                        #{pId}
+                        </if>
+        </trim>
+    </insert>
+
+    <delete id="delete" >
+        DELETE FROM report_posts
+        WHERE id = #{id}
+    </delete>
+
+    <update id="update" parameterType="com.hzy.entity.ReportPosts">
+        UPDATE report_posts
+        <set>
+                    <if test="null != pId ">p_id = #{pId}</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+
+    <select id="load" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List" />
+        FROM report_posts
+        WHERE id = #{id}
+    </select>
+
+    <select id="pageList" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List" />
+        FROM report_posts
+        LIMIT #{offset}, #{pageSize}
+    </select>
+
+    <select id="pageListCount" resultType="java.lang.Integer">
+        SELECT count(1)
+        FROM report_posts
+    </select>
+
+</mapper>
